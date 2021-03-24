@@ -13,10 +13,11 @@ public class EightBitAudioConverter : MonoBehaviour {
 
     [SerializeField] private string BGMName = "";
     [SerializeField] private bool IsPlaying = false;
-    [SerializeField] private WaveType waveType = WaveType.Sine;
-    [SerializeField, Range (0.0002f, 1)] private float Threshold = 0.005f;
-    [SerializeField, Range (0, 1)] private float Ratio = 0.5f;
-    [SerializeField, Range (0, 1)] private double EightBitVolume = 0.2d;
+    [SerializeField] private WaveType waveType = WaveType.Square;
+    [SerializeField, Range (0.0002f, 1)] private float Threshold = 0.02f;
+    [SerializeField, Range (0, 1)] private float Ratio = 0f;
+    [SerializeField, Range (0, 1)] private double EightBitVolume = 0.5d;
+    [SerializeField] private float pitch = -24;
 
     private readonly int NUM_SAMPLES = 2048;
 
@@ -41,12 +42,15 @@ public class EightBitAudioConverter : MonoBehaviour {
 
         //スペクトル表示
         for (int i = 1; i < _bgmSpectrum.Length - 1; i++) {
-            Debug.DrawLine (new Vector3 (Mathf.Log (i - 1) * 3, Mathf.Log (_bgmSpectrum[i - 1]), 3), new Vector3 (Mathf.Log (i) * 3, Mathf.Log (_bgmSpectrum[i]), 3), Color.blue);
+            Debug.DrawLine (
+                new Vector3 (Mathf.Log (i - 1) * 3, Mathf.Log (_bgmSpectrum[i - 1]), 3), new Vector3 (Mathf.Log (i) * 3, Mathf.Log (_bgmSpectrum[i]), 3), Color.blue
+            );
         }
     }
 
     void OnAudioFilterRead (float[] data, int channels) {
         if (!IsPlaying) return;
+        if (_bgmSpectrum == null) return;
 
         for (int i = 0; i < NUM_SAMPLES; i++) {
             data[i] *= (1 - Ratio);
@@ -60,7 +64,7 @@ public class EightBitAudioConverter : MonoBehaviour {
                 waveType,
                 i,
                 channels,
-                ((float) _sampleRate / (float) NUM_SAMPLES) * i
+                ((float) _sampleRate / (float) NUM_SAMPLES) * i * Mathf.Pow (2, (pitch / 12))
             );
 
             for (int j = 0; j < data.Length; j++) {
@@ -117,6 +121,19 @@ public class EightBitAudioConverter : MonoBehaviour {
 
             default:
                 return ret;
+        }
+    }
+
+    private void TestWave (float[] data, int channels) {
+        float[] wave = GetWave (
+            waveType,
+            0,
+            channels,
+            440 * Mathf.Pow (2, (pitch / 12))
+        );
+
+        for (int j = 0; j < data.Length; j++) {
+            data[j] = wave[j] * Ratio;
         }
     }
 }
