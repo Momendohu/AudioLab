@@ -95,26 +95,22 @@ public class EightBitAudioConverter : MonoBehaviour {
         float ret = 0;
         switch (waveType) {
             case WaveType.Sine:
-                _waveTime[index] += increment;
                 ret = (float) (EightBitVolume * Math.Sin (_waveTime[index]));
                 if (_waveTime[index] > 2 * Math.PI) _waveTime[index] = 0;
                 return ret;
 
             case WaveType.Square:
-                _waveTime[index] += increment;
                 ret = (float) (EightBitVolume * ((_waveTime[index] % Math.PI * 2) < Math.PI * 2 * 0.5 ? 1.0 : -1.0));
                 if (_waveTime[index] > 2 * Math.PI) _waveTime[index] = 0;
                 return ret;
 
             case WaveType.Triangle:
-                _waveTime[index] += increment;
                 if (_waveTime[index] > 2 * Math.PI) _waveTime[index] = 0;
                 double t = (_waveTime[index] + Math.PI * 2) % Math.PI;
                 ret = (float) (EightBitVolume * ((t < Math.PI ? t - Math.PI : Math.PI - t) / Math.PI * 2 + 1.0));
                 return ret;
 
             case WaveType.Sawtooth:
-                _waveTime[index] += increment;
                 ret = (float) (EightBitVolume * ((_waveTime[index] + Math.PI) % Math.PI * 2) / Math.PI - 1.0);
                 if (_waveTime[index] > 2 * Math.PI) _waveTime[index] = 0;
                 return ret;
